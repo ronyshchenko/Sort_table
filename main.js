@@ -1,37 +1,36 @@
 'use strict';
-'use strict';
-let sorting = document.getElementById('sorting');
+function makeSortable (table) {
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
 
-sorting.onclick = function(e) {
-  if (e.target.tagName != 'TH') return;
-  sortGrid(e.target.cellIndex, e.target.getAttribute('data-type'));
-};
+  thead.addEventListener('click', (event) => {
+    const th = event.target.closest('th');
+    if (!th) {
+      return;
+    }
 
-function sortGrid(colNum, type) {
-  let tbody = sorting.getElementsByTagName('tbody')[0];
-  let rowsArray = [].slice.call(tbody.rows);
-  let compare;
+    const column = th.cellIndex;
+    const sortType = th.dataset.sortType;
+    const rows = [...tbody.children];
+    
+    rows.sort((rowA, rowB) => {
+      const valueA = rowA.cells[column].textContent;
+      const valueB = rowB.cells[column].textContent;
 
-  switch (type) {
-    case 'number':
-      compare = function(rowA, rowB) {
-        return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
-      };
-      break;
-    case 'string':
-      compare = function(rowA, rowB) {
-        return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML;
-      };
-      break;
-  }
-
-  rowsArray.sort(compare);
-
-  sorting.removeChild(tbody);
-  
-  for (var i = 0; i < rowsArray.length; i++) {
-    tbody.appendChild(rowsArray[i]);
-  }
-
-  sorting.appendChild(tbody);
+      switch (sortType) {
+        case 'number' :
+          return (+valueA) - (+valueB);
+        case 'string':
+          return (valueA > valueB) ? 1 : -1;
+        default:
+          return 0;
+      }
+    });
+    for (const row of rows) {
+      tbody.appendChild(row);
+    }
+  });
 }
+makeSortable (
+  document.querySelector('table')
+);  
